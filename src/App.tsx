@@ -1,9 +1,15 @@
-import { useState, ChangeEvent } from 'react'
+import { useState, ChangeEvent, useEffect } from 'react'
+
+import { optionType } from './types'
 
 const App = (): JSX.Element => {
   const [term, setTerm] = useState<string>('')
 
-  const [options, setOptions] = useState<[]>([])
+  const [city, setCity] = useState<optionType | null>(null)
+
+  const [options, setOptions] = useState<optionType[]>([])
+
+  // const [options, setOptions] = useState<[]>([])
 
   const getSearchOptions = (value: string) => {
     fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${term}&limit=5&appid=${process.env.REACT_APP_API_KEY}
@@ -15,6 +21,7 @@ const App = (): JSX.Element => {
   const onInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.trim()
     setTerm(value)
+
     if (value === '') {
       return
     }
@@ -22,7 +29,30 @@ const App = (): JSX.Element => {
     getSearchOptions(value)
   }
 
-  const onOptionSelect = (option) => {}
+  const getForecast = (city: optionType) => {
+    fetch(
+      `https://api.openweathermap.org/data/2.5/weather?lat=${city.lat}&lon=${city.lon}&units=metric&appid=${process.env.REACT_APP_API_KEY}`
+    )
+      .then((res) => res.json())
+      .then((data) => console.log(data))
+  }
+
+  const onSubmit = () => {
+    if (!city) {
+      return
+    }
+    getForecast(city)
+  }
+
+  const onOptionSelect = (option: optionType) => {
+    setCity(option)
+  }
+  useEffect(() => {
+    if (city) {
+      setTerm(city.name)
+      setOptions([])
+    }
+  }, [city])
 
   //
   return (
@@ -44,7 +74,7 @@ const App = (): JSX.Element => {
             onChange={onInputChange}
           />
           <ul className="absolute top-9 bg-white ml-1 rounded-b-md">
-            {options.map((option: { name: string }, index: number) => (
+            {options.map((option: optionType, index: number) => (
               <li key={option.name + '-' + index}>
                 <button
                   className="text-left text-sm w-full hover:bg-zinc-700 hover: text-white px-2 py-1 cursor-pointer"
@@ -55,7 +85,10 @@ const App = (): JSX.Element => {
               </li>
             ))}
           </ul>
-          <button className="rounded-r-md border-2 border-xinc-100 hover:border-zinc-500 hover:text-zinc-500 text-zinc-100 px-2 py-1 cursor-pointer">
+          <button
+            className="rounded-r-md border-2 border-xinc-100 hover:border-zinc-500 hover:text-zinc-500 text-zinc-100 px-2 py-1 cursor-pointer"
+            onClick={onSubmit}
+          >
             search
           </button>
         </div>
