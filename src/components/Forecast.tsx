@@ -1,4 +1,7 @@
+import { getSunTime } from '../helpers'
 import { forecastType } from '../types'
+import Sunrise from './Icons/Sunrise'
+import Sunset from './Icons/Sunset'
 
 type Props = {
   data: forecastType
@@ -53,6 +56,18 @@ const Forecast = ({ data }: Props): JSX.Element => {
               </p>
             </div>
           ))}
+        </section>
+
+        <section className="flex justify-between text-zinc-700">
+          <div className="w-[140px] text-xs font-bold flex flex-col items-center bg-white/20 background-blur-ls rouned drop-shadow-lg py-4 mb-5">
+            <Sunrise />
+            <span className="mt-2">{getSunTime(data.sunrise)}</span>
+          </div>
+
+          <div className="w-[140px] text-xs font-bold flex flex-col items-center bg-white/20 background-blur-ls rouned drop-shadow-lg py-4 mb-5">
+            <Sunset />
+            <span className="mt-2"> {getSunTime(data.sunset)}</span>
+          </div>
         </section>
       </div>
     </div>
